@@ -59,23 +59,21 @@ class MotionKit {
         var valZ: Double!
         if manager.accelerometerAvailable {
             manager.accelerometerUpdateInterval = interval
-            manager.startAccelerometerUpdatesToQueue(NSOperationQueue()) {
-                (data: CMAccelerometerData!, error: NSError!) in
-                
-                if let isError = error {
-                    NSLog("Error: %@", isError)
-                }
-                valX = data.acceleration.x
-                valY = data.acceleration.y
-                valZ = data.acceleration.z
-                
-                if values != nil{
-                    values!(x: valX,y: valY,z: valZ)
-                }
-                var absoluteVal = sqrt(valX * valX + valY * valY + valZ * valZ)
-                self.delegate?.retrieveAccelerometerValues!(valX, y: valY, z: valZ, absoluteValue: absoluteVal)
-            }
-            
+			manager.startAccelerometerUpdatesToQueue(NSOperationQueue.currentQueue()!, withHandler: {
+				accelerometerData,error in
+				if let isError = error{
+					NSLog("Error: %@", isError)
+				}
+				valX = accelerometerData!.acceleration.x
+				valY = accelerometerData!.acceleration.y
+				valZ = accelerometerData!.acceleration.z
+				if values != nil{
+					values!(x: valX,y: valY,z: valZ)
+				}
+				var absoluteVal = sqrt(valX * valX + valY * valY + valZ * valZ)
+				self.delegate?.retrieveAccelerometerValues!(valX, y: valY, z: valZ, absoluteValue: absoluteVal)
+			})
+			
         } else {
             NSLog("The Accelerometer is not available")
         }
@@ -97,23 +95,23 @@ class MotionKit {
         var valZ: Double!
         if manager.gyroAvailable{
             manager.gyroUpdateInterval = interval
-            manager.startGyroUpdatesToQueue(NSOperationQueue()) {
-                (data: CMGyroData!, error: NSError!) in
+            manager.startGyroUpdatesToQueue(NSOperationQueue.currentQueue()!, withHandler: {
+                CMGyroData, error in
                 
                 if let isError = error{
                     NSLog("Error: %@", isError)
                 }
-                valX = data.rotationRate.x
-                valY = data.rotationRate.y
-                valZ = data.rotationRate.z
+                valX = CMGyroData!.rotationRate.x
+                valY = CMGyroData!.rotationRate.y
+                valZ = CMGyroData!.rotationRate.z
                 
                 if values != nil{
                     values!(x: valX, y: valY, z: valZ)
                 }
                 var absoluteVal = sqrt(valX * valX + valY * valY + valZ * valZ)
                 self.delegate?.retrieveGyroscopeValues!(valX, y: valY, z: valZ, absoluteValue: absoluteVal)
-            }
-            
+            })
+			
         } else {
             NSLog("The Gyroscope is not available")
         }
@@ -126,7 +124,7 @@ class MotionKit {
     *   Starts magnetometer updates, providing data to the given handler through the given queue.
     *   You can access the retrieved values either by a Trailing Closure or through a Delegate.
     */
-    @availability(iOS, introduced=5.0)
+    @available(iOS, introduced=5.0)
     func getMagnetometerValues (interval: NSTimeInterval = 0.1, values: ((x: Double, y:Double, z:Double) -> ())? ){
         
         var valX: Double!
@@ -134,22 +132,22 @@ class MotionKit {
         var valZ: Double!
         if manager.magnetometerAvailable {
             manager.magnetometerUpdateInterval = interval
-            manager.startMagnetometerUpdatesToQueue(NSOperationQueue()){
-                (data: CMMagnetometerData!, error: NSError!) in
+            manager.startMagnetometerUpdatesToQueue(NSOperationQueue.currentQueue()!, withHandler: {
+                CMMagnetometerData, error in
                 
                 if let isError = error{
                     NSLog("Error: %@", isError)
                 }
-                valX = data.magneticField.x
-                valY = data.magneticField.y
-                valZ = data.magneticField.z
+                valX = CMMagnetometerData!.magneticField.x
+                valY = CMMagnetometerData!.magneticField.y
+                valZ = CMMagnetometerData!.magneticField.z
                 
                 if values != nil{
                     values!(x: valX, y: valY, z: valZ)
                 }
                 var absoluteVal = sqrt(valX * valX + valY * valY + valZ * valZ)
                 self.delegate?.retrieveMagnetometerValues!(valX, y: valY, z: valZ, absoluteValue: absoluteVal)
-            }
+            })
             
         } else {
             NSLog("Magnetometer is not available")
@@ -168,20 +166,20 @@ class MotionKit {
     *   Trailing Closure or through a Delegate.
     */
     func getDeviceMotionObject (interval: NSTimeInterval = 0.1, values: ((deviceMotion: CMDeviceMotion) -> ())? ) {
-        
+		
         if manager.deviceMotionAvailable{
             manager.deviceMotionUpdateInterval = interval
-            manager.startDeviceMotionUpdatesToQueue(NSOperationQueue()){
-                (data: CMDeviceMotion!, error: NSError!) in
+            manager.startDeviceMotionUpdatesToQueue(NSOperationQueue.currentQueue()!, withHandler: {
+                CMDeviceMotion, error in
                 
                 if let isError = error{
                     NSLog("Error: %@", isError)
                 }
                 if values != nil{
-                    values!(deviceMotion: data)
+                    values!(deviceMotion: CMDeviceMotion!)
                 }
-                self.delegate?.retrieveDeviceMotionObject!(data)
-            }
+                self.delegate?.retrieveDeviceMotionObject!(CMDeviceMotion!)
+            })
             
         } else {
             NSLog("Device Motion is not available")
@@ -198,24 +196,25 @@ class MotionKit {
         var valX: Double!
         var valY: Double!
         var valZ: Double!
+		
         if manager.deviceMotionAvailable{
             manager.deviceMotionUpdateInterval = interval
-            manager.startDeviceMotionUpdatesToQueue(NSOperationQueue()){
-                (data: CMDeviceMotion!, error: NSError!) in
+            manager.startDeviceMotionUpdatesToQueue(NSOperationQueue.currentQueue()!, withHandler: {
+                CMDeviceMotion, error in
                 
                 if let isError = error{
                     NSLog("Error: %@", isError)
                 }
-                valX = data.userAcceleration.x
-                valY = data.userAcceleration.y
-                valZ = data.userAcceleration.z
+                valX = CMDeviceMotion!.userAcceleration.x
+                valY = CMDeviceMotion!.userAcceleration.y
+                valZ = CMDeviceMotion!.userAcceleration.z
                 
                 if values != nil{
                     values!(x: valX, y: valY, z: valZ)
                 }
                 
                 self.delegate?.getAccelerationValFromDeviceMotion!(valX, y: valY, z: valZ)
-            }
+            })
             
         } else {
             NSLog("Device Motion is unavailable")
@@ -234,15 +233,15 @@ class MotionKit {
         var valZ: Double!
         if manager.deviceMotionAvailable{
             manager.deviceMotionUpdateInterval = interval
-            manager.startDeviceMotionUpdatesToQueue(NSOperationQueue()){
-                (data: CMDeviceMotion!, error: NSError!) in
+            manager.startDeviceMotionUpdatesToQueue(NSOperationQueue.currentQueue()!, withHandler: {
+                CMDeviceMotion, error in
                 
                 if let isError = error{
                     NSLog("Error: %@", isError)
                 }
-                valX = data.gravity.x
-                valY = data.gravity.y
-                valZ = data.gravity.z
+                valX = CMDeviceMotion!.gravity.x
+                valY = CMDeviceMotion!.gravity.y
+                valZ = CMDeviceMotion!.gravity.z
                 
                 if values != nil{
                     values!(x: valX, y: valY, z: valZ)
@@ -250,7 +249,7 @@ class MotionKit {
                 
                 var absoluteVal = sqrt(valX * valX + valY * valY + valZ * valZ)
                 self.delegate?.getGravityAccelerationValFromDeviceMotion!(valX, y: valY, z: valZ)
-            }
+            })
             
         } else {
             NSLog("Device Motion is not available")
@@ -267,18 +266,18 @@ class MotionKit {
         
         if manager.deviceMotionAvailable{
             manager.deviceMotionUpdateInterval = interval
-            manager.startDeviceMotionUpdatesToQueue(NSOperationQueue()){
-                (data: CMDeviceMotion!, error: NSError!) in
+            manager.startDeviceMotionUpdatesToQueue(NSOperationQueue.currentQueue()!, withHandler: {
+                CMDeviceMotion, error in
                 
                 if let isError = error{
                     NSLog("Error: %@", isError)
                 }
                 if values != nil{
-                    values!(attitude: data.attitude)
+                    values!(attitude: CMDeviceMotion!.attitude)
                 }
                 
-                self.delegate?.getAttitudeFromDeviceMotion!(data.attitude)
-            }
+                self.delegate?.getAttitudeFromDeviceMotion!(CMDeviceMotion!.attitude)
+            })
             
         } else {
             NSLog("Device Motion is not available")
@@ -297,15 +296,15 @@ class MotionKit {
         var valZ: Double!
         if manager.deviceMotionAvailable{
             manager.deviceMotionUpdateInterval = interval
-            manager.startDeviceMotionUpdatesToQueue(NSOperationQueue()){
-                (data: CMDeviceMotion!, error: NSError!) in
+            manager.startDeviceMotionUpdatesToQueue(NSOperationQueue.currentQueue()!, withHandler: {
+                CMDeviceMotion, error in
                 
                 if let isError = error{
                     NSLog("Error: %@", isError)
                 }
-                valX = data.rotationRate.x
-                valY = data.rotationRate.y
-                valZ = data.rotationRate.z
+                valX = CMDeviceMotion!.rotationRate.x
+                valY = CMDeviceMotion!.rotationRate.y
+                valZ = CMDeviceMotion!.rotationRate.z
                 
                 if values != nil{
                     values!(x: valX, y: valY, z: valZ)
@@ -313,7 +312,7 @@ class MotionKit {
                 
                 var absoluteVal = sqrt(valX * valX + valY * valY + valZ * valZ)
                 self.delegate?.getRotationRateFromDeviceMotion!(valX, y: valY, z: valZ)
-            }
+            })
             
         } else {
             NSLog("Device Motion is not available")
@@ -334,16 +333,16 @@ class MotionKit {
         var valAccuracy: Int32!
         if manager.deviceMotionAvailable{
             manager.deviceMotionUpdateInterval = interval
-            manager.startDeviceMotionUpdatesToQueue(NSOperationQueue()){
-                (data: CMDeviceMotion!, error: NSError!) in
-                
+            manager.startDeviceMotionUpdatesToQueue(NSOperationQueue.currentQueue()!, withHandler: {
+				CMDeviceMotion, error in
+				
                 if let isError = error{
                     NSLog("Error: %@", isError)
                 }
-                valX = data.magneticField.field.x
-                valY = data.magneticField.field.y
-                valZ = data.magneticField.field.z
-                valAccuracy = data.magneticField.accuracy.value
+                valX = CMDeviceMotion!.magneticField.field.x
+                valY = CMDeviceMotion!.magneticField.field.y
+                valZ = CMDeviceMotion!.magneticField.field.z
+                valAccuracy = CMDeviceMotion!.magneticField.accuracy.rawValue
                 
                 
                 if values != nil{
@@ -351,7 +350,7 @@ class MotionKit {
                 }
                 
                 self.delegate?.getMagneticFieldFromDeviceMotion!(valX, y: valY, z: valZ)
-            }
+            })
             
         } else {
             NSLog("Device Motion is not available")
@@ -369,21 +368,21 @@ class MotionKit {
     /*  MARK :- INSTANTANIOUS METHODS START HERE  */
     
     func getAccelerationAtCurrentInstant (values: (x:Double, y:Double, z:Double) -> ()){
-        self.getAccelerationFromDeviceMotion(interval: 0.5) { (x, y, z) -> () in
+        self.getAccelerationFromDeviceMotion(0.5) { (x, y, z) -> () in
             values(x: x,y: y,z: z)
             self.stopDeviceMotionUpdates()
         }
     }
     
     func getGravitationalAccelerationAtCurrentInstant (values: (x:Double, y:Double, z:Double) -> ()){
-        self.getGravityAccelerationFromDeviceMotion(interval: 0.5) { (x, y, z) -> () in
+        self.getGravityAccelerationFromDeviceMotion(0.5) { (x, y, z) -> () in
             values(x: x,y: y,z: z)
             self.stopDeviceMotionUpdates()
         }
     }
     
     func getAttitudeAtCurrentInstant (values: (attitude: CMAttitude) -> ()){
-        self.getAttitudeFromDeviceMotion(interval: 0.5) { (attitude) -> () in
+        self.getAttitudeFromDeviceMotion(0.5) { (attitude) -> () in
             values(attitude: attitude)
             self.stopDeviceMotionUpdates()
         }
@@ -391,14 +390,14 @@ class MotionKit {
     }
     
     func getMageticFieldAtCurrentInstant (values: (x:Double, y:Double, z:Double) -> ()){
-        self.getMagneticFieldFromDeviceMotion(interval: 0.5) { (x, y, z, accuracy) -> () in
+        self.getMagneticFieldFromDeviceMotion(0.5) { (x, y, z, accuracy) -> () in
             values(x: x,y: y,z: z)
             self.stopDeviceMotionUpdates()
         }
     }
     
     func getGyroValuesAtCurrentInstant (values: (x:Double, y:Double, z:Double) -> ()){
-        self.getRotationRateFromDeviceMotion(interval: 0.5) { (x, y, z) -> () in
+        self.getRotationRateFromDeviceMotion(0.5) { (x, y, z) -> () in
             values(x: x,y: y,z: z)
             self.stopDeviceMotionUpdates()
         }
@@ -447,7 +446,7 @@ class MotionKit {
     *  Discussion:
     *   Stops magnetometer updates.
     */
-    @availability(iOS, introduced=5.0)
+    @available(iOS, introduced=5.0)
     func stopmagnetometerUpdates() {
         self.manager.stopMagnetometerUpdates()
         NSLog("Magnetometer Updates Status - Stopped")
